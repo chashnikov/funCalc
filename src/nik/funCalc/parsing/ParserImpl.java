@@ -11,6 +11,7 @@ import java.util.List;
  multExpression := primaryExpression (('*'|'/') primaryExpression)*
  primaryExpression := '(' expression ')'
  primaryExpression := id '(' expression (',' expression)* ')'
+ primaryExpression := number
  statement := expression ';'
  statement := 'print' expression ';'
  statement :=
@@ -28,27 +29,64 @@ public class ParserImpl implements Parser {
     myLexer = lexer;
   }
 
+  private List<Expression> parseExpressionList() {
+    List<Expression> expressions = new ArrayList<Expression>();
+    do {
+      Expression expression = parseExpression();
+      expressions.add(expression);
+    }
+    while (myLexer.nextToken() == TokenType.COMMA);
+    myLexer.pushBack();
+    return expressions;
+  }
+
   private Expression parsePrimaryExpression() {
-    return null;
+    TokenType type = myLexer.nextToken();
+    if (type == TokenType.LPAREN) {
+      Expression expression = parseExpression();
+      tokenExpected(TokenType.RPAREN);
+      return expression;
+    }
+    if (type == TokenType.IDENTIFIER) {
+      String functionName = myLexer.getToken();
+      tokenExpected(TokenType.LPAREN);
+      List<Expression> arguments = parseExpressionList();
+      tokenExpected(TokenType.RPAREN);
+      return new FunctionCallExpression(functionName, arguments);
+    }
+    if (type == TokenType.INT) {
+      try {
+        int value = Integer.parseInt(myLexer.getToken());
+        return new IntegerLiteralExpression(value);
+      }
+      catch (NumberFormatException e) {
+        throw new ParsingException(myLexer.getToken()+" is not an integer");
+      }
+    }
+    throw new ParsingException("'(' or number or identifier expected but " + myLexer.getToken() + " found");
   }
 
   private Expression parseMultExpression() {
     Expression expression = parsePrimaryExpression();
     TokenType type = myLexer.nextToken();
-    while (type == TokenType.SYMBOL && (myLexer.getToken().equals("*") || myLexer.getToken().equals("/"))) {
-      Expression next = parseMultExpression();
-      expression = new BinaryExpression(myLexer.getToken().equals("*") ? Operations.MULT : Operations.DIV, expression, next);
+    while (type == TokenType.MULT || type == TokenType.DIV) {
+      Expression next = parsePrimaryExpression();
+      expression = new BinaryExpression(type == TokenType.MULT ? Operations.MULT : Operations.DIV, expression, next);
+      type = myLexer.nextToken();
     }
+    myLexer.pushBack();
     return expression;
   }
 
   private Expression parseAddExpression() {
     Expression expression = parseMultExpression();
     TokenType type = myLexer.nextToken();
-    while (type == TokenType.SYMBOL && (myLexer.getToken().equals("+") || myLexer.getToken().equals("-"))) {
+    while (type == TokenType.PLUS || type == TokenType.MINUS) {
       Expression next = parseMultExpression();
-      expression = new BinaryExpression(myLexer.getToken().equals("+") ? Operations.ADD : Operations.SUB, expression, next);
+      expression = new BinaryExpression(type == TokenType.PLUS ? Operations.ADD : Operations.SUB, expression, next);
+      type = myLexer.nextToken();
     }
+    myLexer.pushBack();
     return expression;
   }
 
@@ -60,17 +98,17 @@ public class ParserImpl implements Parser {
     TokenType type = myLexer.nextToken();
     if (type == TokenType.IDENTIFIER && myLexer.getToken().equals("print")) {
       Expression expression = parseExpression();
-      symbolExpected(";");
+      tokenExpected(TokenType.SEMICOLON);
       return new PrintStatement(expression);
     }
     myLexer.pushBack();
     Expression expression = parseExpression();
-    symbolExpected(";");
+    tokenExpected(TokenType.SEMICOLON);
     return new ExpressionStatement(expression);
   }
 
-  private void symbolExpected(final String text) {
-    tokenExpected(TokenType.SYMBOL, text);
+  private void tokenExpected(TokenType type) {
+    tokenExpected(type, null);
   }
 
   private void tokenExpected(TokenType type, String text) {
@@ -88,7 +126,12 @@ public class ParserImpl implements Parser {
     do {
       Statement statement = parseStatement();
       statements.add(statement);
-    } while (myLexer.getTokenType() == TokenType.EOF);
-    return new StatementsNode(statements.toArray(new Statement[statements.size()]));
+      TokenType type = myLexer.nextToken();
+      if (type == TokenType.EOF) {
+        break;
+      }
+      myLexer.pushBack();
+    } while (true);
+    return new StatementsNode(statements);
   }
 }

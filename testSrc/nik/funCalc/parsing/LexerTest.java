@@ -52,7 +52,7 @@ public class LexerTest extends TestCase {
     Lexer lexer = create("x+2");
     assertEquals(TokenType.IDENTIFIER, lexer.nextToken());
     assertEquals("x", lexer.getToken());
-    assertEquals(TokenType.SYMBOL, lexer.nextToken());
+    assertEquals(TokenType.PLUS, lexer.nextToken());
     assertEquals("+", lexer.getToken());
     assertEquals(TokenType.INT, lexer.nextToken());
     assertEquals("2", lexer.getToken());
@@ -60,11 +60,10 @@ public class LexerTest extends TestCase {
   }
 
   public void testWhitespaces() throws Exception {
-    Lexer lexer = create("  x \t+\n2    ");
+    Lexer lexer = create("  x \t-\n2    ");
     assertEquals(TokenType.IDENTIFIER, lexer.nextToken());
     assertEquals("x", lexer.getToken());
-    assertEquals(TokenType.SYMBOL, lexer.nextToken());
-    assertEquals("+", lexer.getToken());
+    assertEquals(TokenType.MINUS, lexer.nextToken());
     assertEquals(TokenType.INT, lexer.nextToken());
     assertEquals("2", lexer.getToken());
     assertEof(lexer);

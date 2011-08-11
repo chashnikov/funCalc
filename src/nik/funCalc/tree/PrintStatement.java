@@ -14,6 +14,10 @@ public class PrintStatement implements Statement {
     return myExpression;
   }
 
+  public String getText() {
+    return "print " + myExpression.getText() + ";";
+  }
+
   public void accept(NodeVisitor visitor) {
     visitor.visitPrintStatement(this);
   }

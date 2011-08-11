@@ -26,6 +26,10 @@ public class BinaryExpression implements Expression {
     return myRightOperand;
   }
 
+  public String getText() {
+    return "(" + myLeftOperand.getText() + ")" + myOperation.getText() + "(" + myRightOperand.getText() + ")";
+  }
+
   public void accept(NodeVisitor visitor) {
     visitor.visitBinaryExpression(this);
   }

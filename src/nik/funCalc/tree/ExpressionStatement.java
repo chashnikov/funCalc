@@ -14,6 +14,10 @@ public class ExpressionStatement implements Statement {
     return myExpression;
   }
 
+  public String getText() {
+    return myExpression.getText() + ";";
+  }
+
   public void accept(NodeVisitor visitor) {
     visitor.visitExpressionStatement(this);
   }

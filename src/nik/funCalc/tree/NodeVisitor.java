@@ -13,4 +13,6 @@ public interface NodeVisitor {
   void visitFunctionCallExpression(FunctionCallExpression node);
 
   void visitBinaryExpression(BinaryExpression node);
+
+  void visitIntegerLiteral(IntegerLiteralExpression node);
 }

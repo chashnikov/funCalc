@@ -1,17 +1,30 @@
 package nik.funCalc.tree;
 
+import java.util.List;
+
 /**
  * @author nik
  */
 public class StatementsNode implements Node {
-  private Statement[] myStatements;
+  private List<Statement> myStatements;
 
-  public StatementsNode(Statement[] statements) {
+  public StatementsNode(List<Statement> statements) {
     myStatements = statements;
   }
 
-  public Statement[] getStatements() {
+  public List<Statement> getStatements() {
     return myStatements;
+  }
+
+  public String getText() {
+    StringBuilder builder = new StringBuilder();
+    for (Statement statement : myStatements) {
+      if (builder.length() > 0) {
+        builder.append("\n");
+      }
+      builder.append(statement.getText());
+    }
+    return builder.toString();
   }
 
   public void accept(NodeVisitor visitor) {

@@ -7,7 +7,18 @@ import java.util.*;
  * @author nik
  */
 public class Lexer {
-  private static final Set<Character> SYMBOLS = new HashSet<Character>(Arrays.asList('+', '-', '*', '/', '=', ';'));
+  private static final Map<Character, TokenType> SYMBOLS = new HashMap<Character, TokenType>();
+  static {
+    SYMBOLS.put('+', TokenType.PLUS);
+    SYMBOLS.put('-', TokenType.MINUS);
+    SYMBOLS.put('*', TokenType.MULT);
+    SYMBOLS.put('/', TokenType.DIV);
+    SYMBOLS.put('(', TokenType.LPAREN);
+    SYMBOLS.put(')', TokenType.RPAREN);
+    SYMBOLS.put(',', TokenType.COMMA);
+    SYMBOLS.put(';', TokenType.SEMICOLON);
+    SYMBOLS.put('=', TokenType.ASSIGN);
+  }
   private PushbackReader myReader;
   private String myToken;
   private TokenType myTokenType;
@@ -32,8 +43,8 @@ public class Lexer {
         return token("", TokenType.EOF);
       }
 
-      if (SYMBOLS.contains((char) ch)) {
-        return token(String.valueOf((char) ch), TokenType.SYMBOL);
+      if (SYMBOLS.containsKey((char) ch)) {
+        return token(String.valueOf((char) ch), SYMBOLS.get((char)ch));
       }
 
       if ('0' <= ch && ch <= '9') {
