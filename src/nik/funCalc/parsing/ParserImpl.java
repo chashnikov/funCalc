@@ -14,7 +14,7 @@ import java.util.List;
  primaryExpression := number
  statement := expression ';'
  statement := 'print' expression ';'
- statement :=
+ statement := 'var' id '=' expression ';'
 
  program := (statement)+
 */

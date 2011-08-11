@@ -25,8 +25,8 @@ public class FunctionCodeGenerator implements NodeVisitor {
   }
 
   public void visitPrintStatement(PrintStatement node) {
-    node.getExpression().accept(this);
     myMethodVisitor.visitFieldInsn(GETSTATIC, Type.getInternalName(System.class), "out", Type.getDescriptor(PrintStream.class));
+    node.getExpression().accept(this);
     myMethodVisitor.visitMethodInsn(INVOKEVIRTUAL, Type.getInternalName(PrintStream.class), "println",
                                     Type.getMethodDescriptor(Type.VOID_TYPE, new Type[]{Type.INT_TYPE}));
   }

@@ -12,8 +12,9 @@ import java.io.*;
  */
 public class Main {
   public static void main(String[] args) throws IOException {
-    String fileName = args[0];
-    BufferedReader reader = new BufferedReader(new FileReader(new File(fileName)));
+    String filePath = args[0];
+    File file = new File(filePath);
+    BufferedReader reader = new BufferedReader(new FileReader(file));
 
     StatementsNode node;
     try {
@@ -24,10 +25,8 @@ public class Main {
       reader.close();
     }
 
-    File outputDir = new File("out");
-    outputDir.mkdirs();
-    String className = getClassName(fileName);
-    ProgramCodeGenerator.generate(node, outputDir, className);
+    String className = getClassName(file.getName());
+    ProgramCodeGenerator.generate(node, new File("gen"), className);
   }
 
   private static String getClassName(String fileName) {
