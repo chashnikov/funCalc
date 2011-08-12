@@ -7,6 +7,7 @@ fun fac(n) {
   else r = n*fac(n-1);
   return r;
 }
+print fac(5);
 
 fun fib(n) {
   if (n==0) r = 0;
@@ -14,6 +15,7 @@ fun fib(n) {
   else r = fib(n-1) + fib(n-2);
   return r;
 }
+print fib(10);
 
 fun fibFast(n) {
   fn = 1;
@@ -28,7 +30,4 @@ fun fibFast(n) {
   else r = fn;
   return fn;
 }
-
-print fac(5);
-print fib(10);
 print fibFast(10);
