@@ -40,9 +40,16 @@ public class LexerTest extends TestCase {
   }
 
   public void testSymbol() throws Exception {
-    Lexer lexer = create("12");
-    assertEquals(TokenType.INT, lexer.nextToken());
-    assertEquals("12", lexer.getToken());
+    Lexer lexer = create("+");
+    assertEquals(TokenType.PLUS, lexer.nextToken());
+    assertEquals("+", lexer.getToken());
+    assertEof(lexer);
+  }
+
+  public void testSymbol2() throws Exception {
+    Lexer lexer = create("==");
+    assertEquals(TokenType.EQUAL, lexer.nextToken());
+    assertEquals("==", lexer.getToken());
     assertEof(lexer);
   }
 
@@ -57,6 +64,17 @@ public class LexerTest extends TestCase {
     assertEquals("x", lexer.getToken());
     assertEquals(TokenType.PLUS, lexer.nextToken());
     assertEquals("+", lexer.getToken());
+    assertEquals(TokenType.INT, lexer.nextToken());
+    assertEquals("2", lexer.getToken());
+    assertEof(lexer);
+  }
+
+  public void testCompare() throws Exception {
+    Lexer lexer = create("x==2");
+    assertEquals(TokenType.IDENTIFIER, lexer.nextToken());
+    assertEquals("x", lexer.getToken());
+    assertEquals(TokenType.EQUAL, lexer.nextToken());
+    assertEquals("==", lexer.getToken());
     assertEquals(TokenType.INT, lexer.nextToken());
     assertEquals("2", lexer.getToken());
     assertEof(lexer);

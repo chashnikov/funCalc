@@ -7,15 +7,16 @@ import org.objectweb.asm.Opcodes;
  * @author nik
  */
 public class Operations {
-  public static final Operation ADD = new InstructionOperation(Opcodes.IADD, "+");
+  public static final ArithmeticOperation ADD = new InstructionOperation(Opcodes.IADD, "+");
+  public static final ArithmeticOperation SUB = new InstructionOperation(Opcodes.ISUB, "-");
+  public static final ArithmeticOperation MULT = new InstructionOperation(Opcodes.IMUL, "*");
+  public static final ArithmeticOperation DIV = new InstructionOperation(Opcodes.IDIV, "/");
 
-  public static final Operation SUB = new InstructionOperation(Opcodes.ISUB, "-");
+  public static final ComparisonOperation EQUAL = new ComparisonOperation(Opcodes.IF_ICMPEQ, "==");
+  public static final ComparisonOperation LESS = new ComparisonOperation(Opcodes.IF_ICMPLT, "<");
+  public static final ComparisonOperation GREATER = new ComparisonOperation(Opcodes.IF_ICMPGT, ">");
 
-  public static final Operation MULT = new InstructionOperation(Opcodes.IMUL, "*");
-
-  public static final Operation DIV = new InstructionOperation(Opcodes.IDIV, "/");
-
-  private static class InstructionOperation implements Operation {
+  private static class InstructionOperation implements ArithmeticOperation {
     private int myOpcode;
     private String myText;
 

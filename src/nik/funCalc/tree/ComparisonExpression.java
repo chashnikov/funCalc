@@ -3,18 +3,18 @@ package nik.funCalc.tree;
 /**
  * @author nik
  */
-public class BinaryExpression implements Expression, BooleanExpression {
-  private ArithmeticOperation myOperation;
+public class ComparisonExpression implements BooleanExpression {
+  private ComparisonOperation myOperation;
   private Expression myLeftOperand;
   private Expression myRightOperand;
 
-  public BinaryExpression(ArithmeticOperation operation, Expression leftOperand, Expression rightOperand) {
+  public ComparisonExpression(ComparisonOperation operation, Expression leftOperand, Expression rightOperand) {
     myOperation = operation;
     myLeftOperand = leftOperand;
     myRightOperand = rightOperand;
   }
 
-  public ArithmeticOperation getOperation() {
+  public ComparisonOperation getOperation() {
     return myOperation;
   }
 
@@ -27,10 +27,11 @@ public class BinaryExpression implements Expression, BooleanExpression {
   }
 
   public String getText() {
-    return "(" + myLeftOperand.getText() + ")" + myOperation.getText() + "(" + myRightOperand.getText() + ")";
+    return myLeftOperand.getText() + myOperation.getText() + myRightOperand.getText();
   }
 
   public void accept(NodeVisitor visitor) {
-    visitor.visitBinaryExpression(this);
+    visitor.visitComparisonExpression(this);
   }
+
 }

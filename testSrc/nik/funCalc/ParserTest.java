@@ -27,6 +27,10 @@ public class ParserTest extends TestCase {
     assertParsed("1-2*3;", "(1)-((2)*(3));");
   }
 
+  public void testParentheses() {
+    assertParsed("2*(2-3);", "(2)*((2)-(3));");
+  }
+
   public void testPrint() {
     assertParsed("print 1;");
   }
@@ -65,6 +69,20 @@ public class ParserTest extends TestCase {
 
   public void testFunctionCall2() {
     assertParsed("myFun(a,b);");
+  }
+
+  public void testIf() {
+    assertParsed("if (1==2) print 2;",
+                 "if (1==2)\n" +
+                 " print 2;");
+  }
+
+  public void testIfElse() {
+    assertParsed("if (1<2) print 2; else print 3;",
+                 "if (1<2)\n" +
+                 " print 2;\n" +
+                 "else\n" +
+                 " print 3;");
   }
 
   private void assertParsed(final String text) {

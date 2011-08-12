@@ -2,8 +2,7 @@ package nik.funCalc.parsing;
 
 import nik.funCalc.tree.*;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /*
  expression := addExpression
@@ -13,11 +12,13 @@ import java.util.List;
  primaryExpression := id '(' expression (',' expression)* ')'
  primaryExpression := number
  primaryExpression := id
+ booleanExpression := expression ('<' | '>' | '==') expression
  statement := expression ';'
  statement := 'print' expression ';'
  statement := id '=' expression ';'
  statement := 'fun' id '(' id (',' id)* ')' '{' program '}'
  statement := 'return' expression ';'
+ statement := 'if' '(' booleanExpression ')' statement ['else' statement]
 
  program := (statement)+
 */
@@ -26,6 +27,12 @@ import java.util.List;
  * @author nik
  */
 public class ParserImpl implements Parser {
+  private static Map<TokenType, ComparisonOperation> BOOLEAN_OPERATIONS = new HashMap<TokenType, ComparisonOperation>();
+  static {
+    BOOLEAN_OPERATIONS.put(TokenType.EQUAL, Operations.EQUAL);
+    BOOLEAN_OPERATIONS.put(TokenType.LESS, Operations.LESS);
+    BOOLEAN_OPERATIONS.put(TokenType.GREATER, Operations.GREATER);
+  }
   private Lexer myLexer;
 
   public ParserImpl(Lexer lexer) {
@@ -100,6 +107,17 @@ public class ParserImpl implements Parser {
     return parseAddExpression();
   }
 
+  private BooleanExpression parseBooleanExpression() {
+    Expression left = parseExpression();
+    TokenType type = myLexer.nextToken();
+    ComparisonOperation operation = BOOLEAN_OPERATIONS.get(type);
+    if (operation == null) {
+      throw new ParsingException("'<', '>' or '==' expected but " + myLexer.getToken() + " found");
+    }
+    Expression right = parseExpression();
+    return new ComparisonExpression(operation, left, right);
+  }
+
   private Statement parseStatement() {
     TokenType type = myLexer.nextToken();
     if (type == TokenType.IDENTIFIER) {
@@ -116,6 +134,20 @@ public class ParserImpl implements Parser {
       }
       else if (token.equals("fun")) {
         return parseFunctionDeclaration();
+      }
+      else if (token.equals("if")) {
+        tokenExpected(TokenType.LPAREN);
+        BooleanExpression condition = parseBooleanExpression();
+        tokenExpected(TokenType.RPAREN);
+        Statement thenClause = parseStatement();
+        Statement elseClause = null;
+        if (myLexer.nextToken() == TokenType.IDENTIFIER && myLexer.getToken().equals("else")) {
+          elseClause = parseStatement();
+        }
+        else {
+          myLexer.pushBack();
+        }
+        return new IfStatement(condition, thenClause, elseClause);
       }
       if (myLexer.nextToken() == TokenType.ASSIGN) {
         Expression expression = parseExpression();

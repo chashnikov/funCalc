@@ -39,6 +39,10 @@ public class CodeGenTest extends TestCase {
     assertResult("print 1-2-3;", "-4\n");
   }
 
+  public void testParentheses() {
+    assertResult("print 2*(2-3);", "-2\n");
+  }
+
   public void testTwoPrints() {
     assertResult("print 1;print 2;", "1\n2\n");
   }
@@ -57,6 +61,52 @@ public class CodeGenTest extends TestCase {
 
   public void testFunWithTwoArgs() {
     assertResult("fun sum(a,b) { return a+b; } print sum(2,3);", "5\n");
+  }
+
+  public void testIfLess() {
+    assertResult("if (1<2) print 1;", "1\n");
+  }
+
+  public void testIfLess2() {
+    assertResult("if (2<2) print 1;", "");
+  }
+
+  public void testIfEq() {
+    assertResult("if (2==2) print 1;", "1\n");
+  }
+
+  public void testIfEq2() {
+    assertResult("if (2==3) print 1;", "");
+  }
+
+  public void testIfGreater() {
+    assertResult("if (2>3) print 1;", "");
+  }
+
+  public void testIfGreater2() {
+    assertResult("if (2>0-3) print 1;", "1\n");
+  }
+
+  public void testIfElse() {
+    assertResult("if (1>2) print 1; else print 2;", "2\n");
+  }
+
+  public void testIfElse2() {
+    assertResult("if (1<2) print 1; else print 2;", "1\n");
+  }
+
+  public void testRecFun() {
+    assertResult("fun fac(n) { if (n==0) r = 1; else r = n*fac(n-1); return r;} print fac(5);", "120\n");
+  }
+
+  public void testFib() {
+    assertResult("fun fib(n) { " +
+                 "  if (n==0) r = 0; " +
+                 "  else if (n==1) r = 1; " +
+                 "  else r = fib(n-1) + fib(n-2); " +
+                 "  return r;" +
+                 "} " +
+                 "print fib(6);", "8\n");
   }
 
   private void assertResult(String program, String result) {

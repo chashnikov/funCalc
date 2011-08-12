@@ -35,6 +35,7 @@ public class FunctionCodeGenerator implements NodeVisitor {
     for (String parameter : parameters) {
       myVariables.put(parameter, myMaxSlot++);
     }
+    myFunctions.putAll(parent.myFunctions);
   }
 
   public void visitStatements(StatementsNode node) {
@@ -136,5 +137,36 @@ public class FunctionCodeGenerator implements NodeVisitor {
     node.getExpression().accept(this);
     myMethodVisitor.visitInsn(IRETURN);
     myContainsReturn = true;
+  }
+
+  public void visitIfStatement(IfStatement node) {
+    node.getCondition().accept(this);
+    Label label = new Label();
+    myMethodVisitor.visitJumpInsn(IFEQ, label);
+    node.getThenClause().accept(this);
+    Statement elseClause = node.getElseClause();
+    if (elseClause == null) {
+      myMethodVisitor.visitLabel(label);
+    }
+    else {
+      Label end = new Label();
+      myMethodVisitor.visitJumpInsn(GOTO, end);
+      myMethodVisitor.visitLabel(label);
+      elseClause.accept(this);
+      myMethodVisitor.visitLabel(end);
+    }
+  }
+
+  public void visitComparisonExpression(ComparisonExpression node) {
+    node.getLeftOperand().accept(this);
+    node.getRightOperand().accept(this);
+    Label label = new Label();
+    myMethodVisitor.visitJumpInsn(node.getOperation().getOpcode(), label);
+    myMethodVisitor.visitInsn(ICONST_0);
+    Label end = new Label();
+    myMethodVisitor.visitJumpInsn(GOTO, end);
+    myMethodVisitor.visitLabel(label);
+    myMethodVisitor.visitInsn(ICONST_1);
+    myMethodVisitor.visitLabel(end);
   }
 }

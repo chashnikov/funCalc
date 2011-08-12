@@ -7,28 +7,26 @@ import java.util.*;
  * @author nik
  */
 public class Lexer {
-  private static final Map<Character, TokenType> SYMBOLS = new HashMap<Character, TokenType>();
-  static {
-    SYMBOLS.put('+', TokenType.PLUS);
-    SYMBOLS.put('-', TokenType.MINUS);
-    SYMBOLS.put('*', TokenType.MULT);
-    SYMBOLS.put('/', TokenType.DIV);
-    SYMBOLS.put('(', TokenType.LPAREN);
-    SYMBOLS.put(')', TokenType.RPAREN);
-    SYMBOLS.put(',', TokenType.COMMA);
-    SYMBOLS.put(';', TokenType.SEMICOLON);
-    SYMBOLS.put('=', TokenType.ASSIGN);
-    SYMBOLS.put('{', TokenType.LBRACE);
-    SYMBOLS.put('}', TokenType.RBRACE);
-  }
+  private static final TokenType[] SYMBOL_TOKENS = {
+      TokenType.PLUS, TokenType.MINUS, TokenType.MULT, TokenType.DIV,
+      TokenType.LPAREN, TokenType.RPAREN,
+      TokenType.COMMA, TokenType.SEMICOLON,
+      TokenType.ASSIGN,
+      TokenType.LBRACE, TokenType.RBRACE,
+      TokenType.EQUAL, TokenType.LESS, TokenType.GREATER
+  };
   private PushbackReader myReader;
   private String myToken;
   private TokenType myTokenType;
   private Stack<TokenType> myTypeBuffer = new Stack<TokenType>();
   private Stack<String> myTokenBuffer = new Stack<String>();
+  private Map<String, TokenType> mySymbolTokens = new HashMap<String, TokenType>();
 
   public Lexer(Reader reader) {
     myReader = new PushbackReader(reader);
+    for (TokenType token : SYMBOL_TOKENS) {
+      mySymbolTokens.put(token.getName(), token);
+    }
   }
 
   public TokenType nextToken() {
@@ -47,8 +45,17 @@ public class Lexer {
         return token("", TokenType.EOF);
       }
 
-      if (SYMBOLS.containsKey((char) ch)) {
-        return token(String.valueOf((char) ch), SYMBOLS.get((char)ch));
+      int ch2 = myReader.read();
+      if (ch2 != -1) {
+        String s = (char) ch+""+(char) ch2;
+        if (mySymbolTokens.containsKey(s)) {
+          return token(s, mySymbolTokens.get(s));
+        }
+        myReader.unread(ch2);
+      }
+      String s = String.valueOf((char) ch);
+      if (mySymbolTokens.containsKey(s)) {
+        return token(s, mySymbolTokens.get(s));
       }
 
       if ('0' <= ch && ch <= '9') {

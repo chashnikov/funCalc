@@ -23,4 +23,8 @@ public interface NodeVisitor {
   void visitFunctionDeclaration(FunctionDeclaration node);
 
   void visitReturnStatement(ReturnStatement node);
+
+  void visitIfStatement(IfStatement node);
+
+  void visitComparisonExpression(ComparisonExpression node);
 }
