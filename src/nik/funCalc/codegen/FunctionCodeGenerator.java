@@ -19,7 +19,7 @@ public class FunctionCodeGenerator implements NodeVisitor {
   private Map<String, FunctionDeclaration> myFunctions = new HashMap<String, FunctionDeclaration>();
   private FunctionCodeGenerator myParentFunction;
   private int myMaxSlot;
-  private boolean myContainsReturn;
+  private int myReturnsCount;
 
   public FunctionCodeGenerator(MethodVisitor methodVisitor, String className, ClassVisitor classVisitor) {
     myMethodVisitor = methodVisitor;
@@ -36,6 +36,10 @@ public class FunctionCodeGenerator implements NodeVisitor {
       myVariables.put(parameter, myMaxSlot++);
     }
     myFunctions.putAll(parent.myFunctions);
+  }
+
+  public int getReturnsCount() {
+    return myReturnsCount;
   }
 
   public void visitStatements(StatementsNode node) {
@@ -125,9 +129,22 @@ public class FunctionCodeGenerator implements NodeVisitor {
     methodVisitor.visitCode();
     FunctionCodeGenerator generator = new FunctionCodeGenerator(methodVisitor, this, node.getParameters());
     node.getBody().accept(generator);
-    if (!generator.myContainsReturn) {
+    if (generator.myReturnsCount == 0) {
       methodVisitor.visitInsn(ICONST_0);
       methodVisitor.visitInsn(IRETURN);
+    }
+    else if (generator.myReturnsCount == 1) {
+      Statement body = node.getBody();
+      while (body instanceof StatementsNode) {
+        List<Statement> statements = ((StatementsNode) body).getStatements();
+        body = statements.get(statements.size()-1);
+      }
+      if (!(body instanceof ReturnStatement)) {
+        throw new GenerationException("'return' statement must be the last statement in a function body");
+      }
+    }
+    else {
+      throw new GenerationException("function body can contain only one return statement");
     }
     methodVisitor.visitMaxs(0, 0);
     methodVisitor.visitEnd();
@@ -136,7 +153,7 @@ public class FunctionCodeGenerator implements NodeVisitor {
   public void visitReturnStatement(ReturnStatement node) {
     node.getExpression().accept(this);
     myMethodVisitor.visitInsn(IRETURN);
-    myContainsReturn = true;
+    myReturnsCount++;
   }
 
   public void visitIfStatement(IfStatement node) {

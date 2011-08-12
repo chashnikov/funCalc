@@ -29,7 +29,11 @@ public class ProgramCodeGenerator {
     writer.visit(V1_6, ACC_PUBLIC, className, null, "java/lang/Object", new String[0]);
     MethodVisitor methodVisitor = writer.visitMethod(ACC_PUBLIC | ACC_STATIC, "main", "([Ljava/lang/String;)V", null, new String[0]);
     methodVisitor.visitCode();
-    node.accept(new FunctionCodeGenerator(methodVisitor, className, writer));
+    FunctionCodeGenerator generator = new FunctionCodeGenerator(methodVisitor, className, writer);
+    node.accept(generator);
+    if (generator.getReturnsCount() > 0) {
+      throw new GenerationException("'return' statements are allowed only inside functions");
+    }
     methodVisitor.visitInsn(RETURN);
     methodVisitor.visitMaxs(0, 0);
     methodVisitor.visitEnd();
