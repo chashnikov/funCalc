@@ -18,6 +18,8 @@ public class Lexer {
     SYMBOLS.put(',', TokenType.COMMA);
     SYMBOLS.put(';', TokenType.SEMICOLON);
     SYMBOLS.put('=', TokenType.ASSIGN);
+    SYMBOLS.put('{', TokenType.LBRACE);
+    SYMBOLS.put('}', TokenType.RBRACE);
   }
   private PushbackReader myReader;
   private String myToken;

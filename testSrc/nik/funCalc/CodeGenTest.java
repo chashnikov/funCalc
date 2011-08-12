@@ -47,6 +47,18 @@ public class CodeGenTest extends TestCase {
     assertResult("a=1;print a;", "1\n");
   }
 
+  public void testVoidFun() {
+    assertResult("fun myprint(i) { print i; } myprint(239);", "239\n");
+  }
+
+  public void testFunWithOneArg() {
+    assertResult("fun sqr(i) { return i*i; } print sqr(2);", "4\n");
+  }
+
+  public void testFunWithTwoArgs() {
+    assertResult("fun sum(a,b) { return a+b; } print sum(2,3);", "5\n");
+  }
+
   private void assertResult(String program, String result) {
     try {
       ParserImpl parser = new ParserImpl(new Lexer(new StringReader(program)));

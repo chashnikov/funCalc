@@ -19,4 +19,8 @@ public interface NodeVisitor {
   void visitAssignmentStatement(AssignmentStatement node);
 
   void visitVariableExpression(VariableExpression node);
+
+  void visitFunctionDeclaration(FunctionDeclaration node);
+
+  void visitReturnStatement(ReturnStatement node);
 }

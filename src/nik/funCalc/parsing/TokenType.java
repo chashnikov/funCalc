@@ -5,7 +5,8 @@ package nik.funCalc.parsing;
  */
 public enum TokenType {
   IDENTIFIER("Identifier"), INT("Integer"), EOF("End of file"),
-  PLUS("+"), MINUS("-"), MULT("*"), DIV("/"), LPAREN("("), RPAREN(")"), COMMA(","), SEMICOLON(";"), ASSIGN("=");
+  PLUS("+"), MINUS("-"), MULT("*"), DIV("/"), LPAREN("("), RPAREN(")"), COMMA(","), SEMICOLON(";"), ASSIGN("="),
+  LBRACE("{"), RBRACE("}");
   private String myName;
 
   TokenType(String name) {

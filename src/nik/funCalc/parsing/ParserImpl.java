@@ -16,6 +16,8 @@ import java.util.List;
  statement := expression ';'
  statement := 'print' expression ';'
  statement := id '=' expression ';'
+ statement := 'fun' id '(' id (',' id)* ')' '{' program '}'
+ statement := 'return' expression ';'
 
  program := (statement)+
 */
@@ -107,6 +109,14 @@ public class ParserImpl implements Parser {
         tokenExpected(TokenType.SEMICOLON);
         return new PrintStatement(expression);
       }
+      else if (token.equals("return")) {
+        Expression expression = parseExpression();
+        tokenExpected(TokenType.SEMICOLON);
+        return new ReturnStatement(expression);
+      }
+      else if (token.equals("fun")) {
+        return parseFunctionDeclaration();
+      }
       if (myLexer.nextToken() == TokenType.ASSIGN) {
         Expression expression = parseExpression();
         tokenExpected(TokenType.SEMICOLON);
@@ -124,6 +134,24 @@ public class ParserImpl implements Parser {
     return new ExpressionStatement(expression);
   }
 
+  private Statement parseFunctionDeclaration() {
+    tokenExpected(TokenType.IDENTIFIER);
+    String name = myLexer.getToken();
+    tokenExpected(TokenType.LPAREN);
+    List<String> parameters = new ArrayList<String>();
+    do {
+      tokenExpected(TokenType.IDENTIFIER);
+      parameters.add(myLexer.getToken());
+    }
+    while (myLexer.nextToken() == TokenType.COMMA);
+    myLexer.pushBack();
+    tokenExpected(TokenType.RPAREN);
+    tokenExpected(TokenType.LBRACE);
+    StatementsNode body = parseStatements(true);
+    tokenExpected(TokenType.RBRACE);
+    return new FunctionDeclaration(name, parameters, body);
+  }
+
   private void tokenExpected(TokenType type) {
     tokenExpected(type, null);
   }
@@ -139,15 +167,19 @@ public class ParserImpl implements Parser {
   }
 
   public StatementsNode parseProgram() {
+    return parseStatements(false);
+  }
+
+  private StatementsNode parseStatements(boolean insideFun) {
     List<Statement> statements = new ArrayList<Statement>();
     do {
       Statement statement = parseStatement();
       statements.add(statement);
       TokenType type = myLexer.nextToken();
-      if (type == TokenType.EOF) {
+      myLexer.pushBack();
+      if (type == TokenType.EOF || insideFun && type == TokenType.RBRACE) {
         break;
       }
-      myLexer.pushBack();
     } while (true);
     return new StatementsNode(statements);
   }

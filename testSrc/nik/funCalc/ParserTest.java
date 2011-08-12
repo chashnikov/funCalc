@@ -44,6 +44,29 @@ public class ParserTest extends TestCase {
     assertParsed("a+b;", "(a)+(b);");
   }
 
+  public void testSimpleFun() {
+    assertParsed("fun myPrint(i) {\n" +
+                 "print i;\n" +
+                 "}");
+  }
+
+  public void testFunWithReturn() {
+    assertParsed("fun sum(a,b) {\n" +
+                 "return a+b;\n" +
+                 "}",
+                 "fun sum(a,b) {\n" +
+                 "return (a)+(b);\n" +
+                 "}");
+  }
+
+  public void testFunctionCall() {
+    assertParsed("myFun(a);");
+  }
+
+  public void testFunctionCall2() {
+    assertParsed("myFun(a,b);");
+  }
+
   private void assertParsed(final String text) {
     assertParsed(text, text);
   }

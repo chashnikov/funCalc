@@ -1,12 +1,10 @@
 package nik.funCalc.codegen;
 
 import nik.funCalc.tree.*;
-import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.Type;
+import org.objectweb.asm.*;
 
 import java.io.PrintStream;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import static org.objectweb.asm.Opcodes.*;
 
@@ -15,11 +13,28 @@ import static org.objectweb.asm.Opcodes.*;
  */
 public class FunctionCodeGenerator implements NodeVisitor {
   private MethodVisitor myMethodVisitor;
+  private String myClassName;
+  private ClassVisitor myClassVisitor;
   private Map<String, Integer> myVariables = new HashMap<String, Integer>();
+  private Map<String, FunctionDeclaration> myFunctions = new HashMap<String, FunctionDeclaration>();
+  private FunctionCodeGenerator myParentFunction;
   private int myMaxSlot;
+  private boolean myContainsReturn;
 
-  public FunctionCodeGenerator(MethodVisitor methodVisitor) {
+  public FunctionCodeGenerator(MethodVisitor methodVisitor, String className, ClassVisitor classVisitor) {
     myMethodVisitor = methodVisitor;
+    myClassName = className;
+    myClassVisitor = classVisitor;
+  }
+
+  public FunctionCodeGenerator(MethodVisitor methodVisitor, FunctionCodeGenerator parent, List<String> parameters) {
+    myMethodVisitor = methodVisitor;
+    myClassName = parent.myClassName;
+    myClassVisitor = parent.myClassVisitor;
+    myParentFunction = parent;
+    for (String parameter : parameters) {
+      myVariables.put(parameter, myMaxSlot++);
+    }
   }
 
   public void visitStatements(StatementsNode node) {
@@ -41,6 +56,30 @@ public class FunctionCodeGenerator implements NodeVisitor {
   }
 
   public void visitFunctionCallExpression(FunctionCallExpression node) {
+    String funName = node.getFunctionName();
+    FunctionDeclaration declaration = myFunctions.get(funName);
+    if (declaration == null) {
+      throw new GenerationException("Cannot resolve function '"+funName+"'");
+    }
+    List<Expression> arguments = node.getArguments();
+    if (declaration.getParameters().size() != arguments.size()) {
+      throw new GenerationException(declaration.getParameters().size()+" parameters for '"+funName+"' expected but '" +
+                                    arguments.size()+" found");
+    }
+    for (Expression argument : arguments) {
+      argument.accept(this);
+    }
+    myMethodVisitor.visitMethodInsn(INVOKESTATIC, myClassName, funName, getMethodSignature(declaration));
+  }
+
+  private String getMethodSignature(FunctionDeclaration declaration) {
+    StringBuilder sig = new StringBuilder();
+    sig.append("(");
+    for (String parameter : declaration.getParameters()) {
+      sig.append("I");
+    }
+    sig.append(")I");
+    return sig.toString();
   }
 
   public void visitBinaryExpression(BinaryExpression node) {
@@ -70,5 +109,32 @@ public class FunctionCodeGenerator implements NodeVisitor {
       throw new GenerationException("Cannot resolve variable '" + varName + "'");
     }
     myMethodVisitor.visitVarInsn(ILOAD, myVariables.get(varName));
+  }
+
+  public void visitFunctionDeclaration(FunctionDeclaration node) {
+    if (myParentFunction != null) {
+      throw new GenerationException("Inner functions aren't supported");
+    }
+    String funName = node.getFunName();
+    if (myFunctions.containsKey(funName)) {
+      throw new GenerationException("function '"+funName+"' already declared");
+    }
+    myFunctions.put(funName, node);
+    MethodVisitor methodVisitor = myClassVisitor.visitMethod(ACC_PRIVATE | ACC_STATIC, funName, getMethodSignature(node), null, null);
+    methodVisitor.visitCode();
+    FunctionCodeGenerator generator = new FunctionCodeGenerator(methodVisitor, this, node.getParameters());
+    node.getBody().accept(generator);
+    if (!generator.myContainsReturn) {
+      methodVisitor.visitInsn(ICONST_0);
+      methodVisitor.visitInsn(IRETURN);
+    }
+    methodVisitor.visitMaxs(0, 0);
+    methodVisitor.visitEnd();
+  }
+
+  public void visitReturnStatement(ReturnStatement node) {
+    node.getExpression().accept(this);
+    myMethodVisitor.visitInsn(IRETURN);
+    myContainsReturn = true;
   }
 }
