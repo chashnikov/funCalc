@@ -12,9 +12,10 @@ import java.util.List;
  primaryExpression := '(' expression ')'
  primaryExpression := id '(' expression (',' expression)* ')'
  primaryExpression := number
+ primaryExpression := id
  statement := expression ';'
  statement := 'print' expression ';'
- statement := 'var' id '=' expression ';'
+ statement := id '=' expression ';'
 
  program := (statement)+
 */
@@ -48,11 +49,14 @@ public class ParserImpl implements Parser {
       return expression;
     }
     if (type == TokenType.IDENTIFIER) {
-      String functionName = myLexer.getToken();
-      tokenExpected(TokenType.LPAREN);
-      List<Expression> arguments = parseExpressionList();
-      tokenExpected(TokenType.RPAREN);
-      return new FunctionCallExpression(functionName, arguments);
+      String name = myLexer.getToken();
+      if (myLexer.nextToken() == TokenType.LPAREN) {
+        List<Expression> arguments = parseExpressionList();
+        tokenExpected(TokenType.RPAREN);
+        return new FunctionCallExpression(name, arguments);
+      }
+      myLexer.pushBack();
+      return new VariableExpression(name);
     }
     if (type == TokenType.INT) {
       try {
@@ -96,12 +100,25 @@ public class ParserImpl implements Parser {
 
   private Statement parseStatement() {
     TokenType type = myLexer.nextToken();
-    if (type == TokenType.IDENTIFIER && myLexer.getToken().equals("print")) {
-      Expression expression = parseExpression();
-      tokenExpected(TokenType.SEMICOLON);
-      return new PrintStatement(expression);
+    if (type == TokenType.IDENTIFIER) {
+      String token = myLexer.getToken();
+      if (token.equals("print")) {
+        Expression expression = parseExpression();
+        tokenExpected(TokenType.SEMICOLON);
+        return new PrintStatement(expression);
+      }
+      if (myLexer.nextToken() == TokenType.ASSIGN) {
+        Expression expression = parseExpression();
+        tokenExpected(TokenType.SEMICOLON);
+        return new AssignmentStatement(token, expression);
+      }
+      myLexer.pushBack();
+      myLexer.pushBack(token, TokenType.IDENTIFIER);
     }
-    myLexer.pushBack();
+    else {
+      myLexer.pushBack();
+    }
+
     Expression expression = parseExpression();
     tokenExpected(TokenType.SEMICOLON);
     return new ExpressionStatement(expression);

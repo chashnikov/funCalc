@@ -15,4 +15,8 @@ public interface NodeVisitor {
   void visitBinaryExpression(BinaryExpression node);
 
   void visitIntegerLiteral(IntegerLiteralExpression node);
+
+  void visitAssignmentStatement(AssignmentStatement node);
+
+  void visitVariableExpression(VariableExpression node);
 }

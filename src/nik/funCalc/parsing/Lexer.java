@@ -22,15 +22,17 @@ public class Lexer {
   private PushbackReader myReader;
   private String myToken;
   private TokenType myTokenType;
-  private boolean myPushedBack;
+  private Stack<TokenType> myTypeBuffer = new Stack<TokenType>();
+  private Stack<String> myTokenBuffer = new Stack<String>();
 
   public Lexer(Reader reader) {
     myReader = new PushbackReader(reader);
   }
 
   public TokenType nextToken() {
-    if (myPushedBack) {
-      myPushedBack = false;
+    if (!myTokenBuffer.isEmpty()) {
+      myTokenType = myTypeBuffer.pop();
+      myToken = myTokenBuffer.pop();
       return myTokenType;
     }
     try {
@@ -91,9 +93,11 @@ public class Lexer {
   }
 
   public void pushBack() {
-    if (myPushedBack) {
-      throw new AssertionError("Cannot push back more than one token!");
-    }
-    myPushedBack = true;
+    pushBack(myToken, myTokenType);
+  }
+
+  public void pushBack(final String token, final TokenType tokenType) {
+    myTokenBuffer.push(token);
+    myTypeBuffer.push(tokenType);
   }
 }

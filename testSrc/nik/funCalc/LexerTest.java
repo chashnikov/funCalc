@@ -1,6 +1,9 @@
-package nik.funCalc.parsing;
+package nik.funCalc;
 
+import junit.framework.Assert;
 import junit.framework.TestCase;
+import nik.funCalc.parsing.Lexer;
+import nik.funCalc.parsing.TokenType;
 
 import java.io.StringReader;
 
@@ -10,7 +13,7 @@ import java.io.StringReader;
 public class LexerTest extends TestCase {
   public void testId() {
     Lexer lexer = create("a");
-    assertEquals(TokenType.IDENTIFIER, lexer.nextToken());
+    Assert.assertEquals(TokenType.IDENTIFIER, lexer.nextToken());
     assertEquals("a", lexer.getToken());
     assertEof(lexer);
   }

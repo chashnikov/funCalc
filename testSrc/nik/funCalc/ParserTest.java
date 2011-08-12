@@ -1,6 +1,8 @@
-package nik.funCalc.parsing;
+package nik.funCalc;
 
 import junit.framework.TestCase;
+import nik.funCalc.parsing.Lexer;
+import nik.funCalc.parsing.ParserImpl;
 import nik.funCalc.tree.StatementsNode;
 
 import java.io.StringReader;
@@ -32,6 +34,14 @@ public class ParserTest extends TestCase {
   public void testStatements() {
     assertParsed("print 1;\n" +
                  "print 2;");
+  }
+
+  public void testAssign() {
+    assertParsed("a=1;");
+  }
+
+  public void testVariable() {
+    assertParsed("a+b;", "(a)+(b);");
   }
 
   private void assertParsed(final String text) {

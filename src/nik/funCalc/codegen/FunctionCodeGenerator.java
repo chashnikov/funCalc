@@ -5,6 +5,8 @@ import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
 
 import java.io.PrintStream;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.objectweb.asm.Opcodes.*;
 
@@ -13,6 +15,8 @@ import static org.objectweb.asm.Opcodes.*;
  */
 public class FunctionCodeGenerator implements NodeVisitor {
   private MethodVisitor myMethodVisitor;
+  private Map<String, Integer> myVariables = new HashMap<String, Integer>();
+  private int myMaxSlot;
 
   public FunctionCodeGenerator(MethodVisitor methodVisitor) {
     myMethodVisitor = methodVisitor;
@@ -32,7 +36,7 @@ public class FunctionCodeGenerator implements NodeVisitor {
   }
 
   public void visitExpressionStatement(ExpressionStatement node) {
-    node.accept(this);
+    node.getExpression().accept(this);
     myMethodVisitor.visitInsn(POP);
   }
 
@@ -47,5 +51,24 @@ public class FunctionCodeGenerator implements NodeVisitor {
 
   public void visitIntegerLiteral(IntegerLiteralExpression node) {
     myMethodVisitor.visitLdcInsn(node.getValue());
+  }
+
+  public void visitAssignmentStatement(AssignmentStatement node) {
+    String varName = node.getVarName();
+    Integer slot = myVariables.get(varName);
+    if (slot == null) {
+      slot = myMaxSlot++;
+      myVariables.put(varName, slot);
+    }
+    node.getExpression().accept(this);
+    myMethodVisitor.visitVarInsn(ISTORE, slot);
+  }
+
+  public void visitVariableExpression(VariableExpression node) {
+    String varName = node.getVarName();
+    if (!myVariables.containsKey(varName)) {
+      throw new GenerationException("Cannot resolve variable '" + varName + "'");
+    }
+    myMethodVisitor.visitVarInsn(ILOAD, myVariables.get(varName));
   }
 }
