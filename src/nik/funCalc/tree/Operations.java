@@ -15,6 +15,9 @@ public class Operations {
   public static final ComparisonOperation EQUAL = new ComparisonOperation(Opcodes.IF_ICMPEQ, "==");
   public static final ComparisonOperation LESS = new ComparisonOperation(Opcodes.IF_ICMPLT, "<");
   public static final ComparisonOperation GREATER = new ComparisonOperation(Opcodes.IF_ICMPGT, ">");
+  public static final ComparisonOperation GREATER_EQ = new ComparisonOperation(Opcodes.IF_ICMPGE, ">=");
+  public static final ComparisonOperation LESS_EQ = new ComparisonOperation(Opcodes.IF_ICMPLE, "<=");
+  public static final ComparisonOperation NOT_EQ = new ComparisonOperation(Opcodes.IF_ICMPNE, "!=");
 
   private static class InstructionOperation implements ArithmeticOperation {
     private int myOpcode;

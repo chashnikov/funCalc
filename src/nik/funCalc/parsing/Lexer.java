@@ -13,7 +13,7 @@ public class Lexer {
       TokenType.COMMA, TokenType.SEMICOLON,
       TokenType.ASSIGN,
       TokenType.LBRACE, TokenType.RBRACE,
-      TokenType.EQUAL, TokenType.LESS, TokenType.GREATER
+      TokenType.EQUAL, TokenType.LESS, TokenType.GREATER, TokenType.GREATER_EQ, TokenType.LESS_EQ, TokenType.NOT_EQ
   };
   private PushbackReader myReader;
   private String myToken;

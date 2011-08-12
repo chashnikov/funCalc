@@ -32,6 +32,9 @@ public class ParserImpl implements Parser {
     BOOLEAN_OPERATIONS.put(TokenType.EQUAL, Operations.EQUAL);
     BOOLEAN_OPERATIONS.put(TokenType.LESS, Operations.LESS);
     BOOLEAN_OPERATIONS.put(TokenType.GREATER, Operations.GREATER);
+    BOOLEAN_OPERATIONS.put(TokenType.GREATER_EQ, Operations.GREATER_EQ);
+    BOOLEAN_OPERATIONS.put(TokenType.LESS_EQ, Operations.LESS_EQ);
+    BOOLEAN_OPERATIONS.put(TokenType.NOT_EQ, Operations.NOT_EQ);
   }
   private Lexer myLexer;
 
@@ -112,7 +115,7 @@ public class ParserImpl implements Parser {
     TokenType type = myLexer.nextToken();
     ComparisonOperation operation = BOOLEAN_OPERATIONS.get(type);
     if (operation == null) {
-      throw new ParsingException("'<', '>' or '==' expected but " + myLexer.getToken() + " found");
+      throw new ParsingException("'<', '>', '<=', '>=', '!=' or '==' expected but " + myLexer.getToken() + " found");
     }
     Expression right = parseExpression();
     return new ComparisonExpression(operation, left, right);

@@ -65,34 +65,39 @@ public class CodeGenTest extends TestCase {
 
   public void testIfLess() {
     assertResult("if (1<2) print 1;", "1\n");
-  }
-
-  public void testIfLess2() {
     assertResult("if (2<2) print 1;", "");
   }
 
   public void testIfEq() {
     assertResult("if (2==2) print 1;", "1\n");
-  }
-
-  public void testIfEq2() {
     assertResult("if (2==3) print 1;", "");
   }
 
   public void testIfGreater() {
     assertResult("if (2>3) print 1;", "");
-  }
-
-  public void testIfGreater2() {
     assertResult("if (2>0-3) print 1;", "1\n");
   }
 
   public void testIfElse() {
     assertResult("if (1>2) print 1; else print 2;", "2\n");
+    assertResult("if (1<2) print 1; else print 2;", "1\n");
   }
 
-  public void testIfElse2() {
-    assertResult("if (1<2) print 1; else print 2;", "1\n");
+  public void testGreaterEq() {
+    assertFalse("1>=2");
+    assertTrue("1>=1");
+    assertTrue("1>=0");
+  }
+
+  public void testLessEq() {
+    assertTrue("1<=2");
+    assertTrue("1<=1");
+    assertFalse("1<=0");
+  }
+
+  public void testNotEq() {
+    assertTrue("1!=2");
+    assertFalse("1!=1");
   }
 
   public void testRecFun() {
@@ -107,6 +112,14 @@ public class CodeGenTest extends TestCase {
                  "  return r;" +
                  "} " +
                  "print fib(6);", "8\n");
+  }
+
+  private void assertTrue(String expression) {
+    assertResult("if (" + expression + ") print 1;", "1\n");
+  }
+
+  private void assertFalse(String expression) {
+    assertResult("if (" + expression + ") print 1;", "");
   }
 
   private void assertResult(String program, String result) {
