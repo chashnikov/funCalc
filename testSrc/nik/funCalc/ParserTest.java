@@ -52,6 +52,10 @@ public class ParserTest extends TestCase {
     assertParsed("fun myPrint(i) {\n" +
                  "print i;\n" +
                  "}");
+    assertParsed("fun myPrint(i) print i;",
+                 "fun myPrint(i) {\n" +
+                 "print i;\n" +
+                 "}");
   }
 
   public void testFunWithReturn() {
@@ -65,24 +69,38 @@ public class ParserTest extends TestCase {
 
   public void testFunctionCall() {
     assertParsed("myFun(a);");
-  }
-
-  public void testFunctionCall2() {
     assertParsed("myFun(a,b);");
   }
 
   public void testIf() {
     assertParsed("if (1==2) print 2;",
                  "if (1==2)\n" +
-                 " print 2;");
+                 "print 2;");
+    assertParsed("if (1==2) {print 2;}",
+                 "if (1==2)\n" +
+                 "print 2;");
+    assertParsed("if (1==2) {print 2;print 3;}",
+                 "if (1==2)\n" +
+                 "print 2;\n"+
+                 "print 3;");
   }
 
   public void testIfElse() {
     assertParsed("if (1<2) print 2; else print 3;",
                  "if (1<2)\n" +
-                 " print 2;\n" +
+                 "print 2;\n" +
                  "else\n" +
-                 " print 3;");
+                 "print 3;");
+  }
+
+  public void testWhile() {
+    assertParsed("while (1<2)\n" +
+                 "print 1;");
+
+    assertParsed("while (1<2) { print 1; print 2; }",
+                 "while (1<2)\n" +
+                 "print 1;\n" +
+                 "print 2;");
   }
 
   private void assertParsed(final String text) {

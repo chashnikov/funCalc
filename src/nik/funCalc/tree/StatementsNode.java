@@ -5,7 +5,7 @@ import java.util.List;
 /**
  * @author nik
  */
-public class StatementsNode implements Node {
+public class StatementsNode implements Statement {
   private List<Statement> myStatements;
 
   public StatementsNode(List<Statement> statements) {

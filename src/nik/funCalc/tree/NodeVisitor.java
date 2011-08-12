@@ -27,4 +27,6 @@ public interface NodeVisitor {
   void visitIfStatement(IfStatement node);
 
   void visitComparisonExpression(ComparisonExpression node);
+
+  void visitWhileStatement(WhileStatement node);
 }

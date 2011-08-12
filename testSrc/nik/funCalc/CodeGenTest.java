@@ -100,6 +100,11 @@ public class CodeGenTest extends TestCase {
     assertFalse("1!=1");
   }
 
+  public void testWhile() {
+    assertResult("a = 1; b = 0; while (a<=5) { b = b+a; a=a+1; } print b;", "15\n");
+    assertResult("while (0<0) { print 1; } print 2;", "2\n");
+  }
+
   public void testRecFun() {
     assertResult("fun fac(n) { if (n==0) r = 1; else r = n*fac(n-1); return r;} print fac(5);", "120\n");
   }

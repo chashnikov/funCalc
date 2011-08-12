@@ -8,9 +8,9 @@ import java.util.List;
 public class FunctionDeclaration implements Statement {
   private String myFunName;
   private List<String> myParameters;
-  private StatementsNode myBody;
+  private Statement myBody;
 
-  public FunctionDeclaration(String funName, List<String> parameters, StatementsNode body) {
+  public FunctionDeclaration(String funName, List<String> parameters, Statement body) {
     myFunName = funName;
     myParameters = parameters;
     myBody = body;
@@ -24,7 +24,7 @@ public class FunctionDeclaration implements Statement {
     return myParameters;
   }
 
-  public StatementsNode getBody() {
+  public Statement getBody() {
     return myBody;
   }
 

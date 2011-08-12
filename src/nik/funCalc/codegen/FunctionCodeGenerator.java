@@ -169,4 +169,15 @@ public class FunctionCodeGenerator implements NodeVisitor {
     myMethodVisitor.visitInsn(ICONST_1);
     myMethodVisitor.visitLabel(end);
   }
+
+  public void visitWhileStatement(WhileStatement node) {
+    Label start = new Label();
+    myMethodVisitor.visitLabel(start);
+    node.getCondition().accept(this);
+    Label end = new Label();
+    myMethodVisitor.visitJumpInsn(IFEQ, end);
+    node.getBody().accept(this);
+    myMethodVisitor.visitJumpInsn(GOTO, start);
+    myMethodVisitor.visitLabel(end);
+  }
 }

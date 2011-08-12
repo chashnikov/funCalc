@@ -16,8 +16,8 @@ public class IfStatement implements Statement {
 
   public String getText() {
     return "if (" + myCondition.getText() + ")\n" +
-           " " + myThenClause.getText() +
-           (myElseClause == null ? "" : "\nelse\n " + myElseClause.getText());
+           myThenClause.getText() +
+           (myElseClause == null ? "" : "\nelse\n" + myElseClause.getText());
   }
 
   public BooleanExpression getCondition() {

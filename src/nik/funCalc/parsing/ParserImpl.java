@@ -16,9 +16,11 @@ import java.util.*;
  statement := expression ';'
  statement := 'print' expression ';'
  statement := id '=' expression ';'
- statement := 'fun' id '(' id (',' id)* ')' '{' program '}'
+ statement := 'fun' id '(' id (',' id)* ')' statement
  statement := 'return' expression ';'
  statement := 'if' '(' booleanExpression ')' statement ['else' statement]
+ statement := 'while' '(' booleanExpression ')' statement ['else' statement]
+ statement := '{' (statement)+ '}'
 
  program := (statement)+
 */
@@ -139,18 +141,10 @@ public class ParserImpl implements Parser {
         return parseFunctionDeclaration();
       }
       else if (token.equals("if")) {
-        tokenExpected(TokenType.LPAREN);
-        BooleanExpression condition = parseBooleanExpression();
-        tokenExpected(TokenType.RPAREN);
-        Statement thenClause = parseStatement();
-        Statement elseClause = null;
-        if (myLexer.nextToken() == TokenType.IDENTIFIER && myLexer.getToken().equals("else")) {
-          elseClause = parseStatement();
-        }
-        else {
-          myLexer.pushBack();
-        }
-        return new IfStatement(condition, thenClause, elseClause);
+        return parseIf();
+      }
+      else if (token.equals("while")) {
+        return parseWhile();
       }
       if (myLexer.nextToken() == TokenType.ASSIGN) {
         Expression expression = parseExpression();
@@ -160,6 +154,11 @@ public class ParserImpl implements Parser {
       myLexer.pushBack();
       myLexer.pushBack(token, TokenType.IDENTIFIER);
     }
+    else if (type == TokenType.LBRACE) {
+      StatementsNode statement = parseStatements(true);
+      tokenExpected(TokenType.RBRACE);
+      return statement;
+    }
     else {
       myLexer.pushBack();
     }
@@ -167,6 +166,29 @@ public class ParserImpl implements Parser {
     Expression expression = parseExpression();
     tokenExpected(TokenType.SEMICOLON);
     return new ExpressionStatement(expression);
+  }
+
+  private Statement parseIf() {
+    tokenExpected(TokenType.LPAREN);
+    BooleanExpression condition = parseBooleanExpression();
+    tokenExpected(TokenType.RPAREN);
+    Statement thenClause = parseStatement();
+    Statement elseClause = null;
+    if (myLexer.nextToken() == TokenType.IDENTIFIER && myLexer.getToken().equals("else")) {
+      elseClause = parseStatement();
+    }
+    else {
+      myLexer.pushBack();
+    }
+    return new IfStatement(condition, thenClause, elseClause);
+  }
+
+  private Statement parseWhile() {
+    tokenExpected(TokenType.LPAREN);
+    BooleanExpression condition = parseBooleanExpression();
+    tokenExpected(TokenType.RPAREN);
+    Statement body = parseStatement();
+    return new WhileStatement(condition, body);
   }
 
   private Statement parseFunctionDeclaration() {
@@ -181,9 +203,7 @@ public class ParserImpl implements Parser {
     while (myLexer.nextToken() == TokenType.COMMA);
     myLexer.pushBack();
     tokenExpected(TokenType.RPAREN);
-    tokenExpected(TokenType.LBRACE);
-    StatementsNode body = parseStatements(true);
-    tokenExpected(TokenType.RBRACE);
+    Statement body = parseStatement();
     return new FunctionDeclaration(name, parameters, body);
   }
 
@@ -205,14 +225,14 @@ public class ParserImpl implements Parser {
     return parseStatements(false);
   }
 
-  private StatementsNode parseStatements(boolean insideFun) {
+  private StatementsNode parseStatements(boolean insideGroup) {
     List<Statement> statements = new ArrayList<Statement>();
     do {
       Statement statement = parseStatement();
       statements.add(statement);
       TokenType type = myLexer.nextToken();
       myLexer.pushBack();
-      if (type == TokenType.EOF || insideFun && type == TokenType.RBRACE) {
+      if (type == TokenType.EOF || insideGroup && type == TokenType.RBRACE) {
         break;
       }
     } while (true);
